@@ -1,5 +1,4 @@
 familyName,givenName,gender,affiliatedTo,dbpediaURI,yagoURI
-McCall,Carl,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Democratic_Party_(United_States),http://dbpedia.org/resource/Carl_McCall,http://yago-knowledge.org/resource/Carl_McCall
 Wynn,Albert,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Democratic_Party_(United_States),http://dbpedia.org/resource/Albert_Wynn,http://yago-knowledge.org/resource/Albert_Wynn
 Fattah,Chaka,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Democratic_Party_(United_States),http://dbpedia.org/resource/Chaka_Fattah,http://yago-knowledge.org/resource/Chaka_Fattah
 Roberts,David,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Democratic_Party_(United_States),http://dbpedia.org/resource/David_Roberts_(mayor),http://yago-knowledge.org/resource/David_Roberts_(mayor)
@@ -649,3 +648,4 @@ Rigell,Scott,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/r
 Heck,Rose,http://yago-knowledge.org/resource/female,http://yago-knowledge.org/resource/Republican_Party_(United_States),http://dbpedia.org/resource/Rose_Marie_Heck,http://yago-knowledge.org/resource/Rose_Marie_Heck
 Allen,Aris,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Republican_Party_(United_States),http://dbpedia.org/resource/Aris_T._Allen,http://yago-knowledge.org/resource/Aris_T._Allen
 Clinton,Bill,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Democratic_Party_(United_States),http://dbpedia.org/resource/Bill_Clinton,http://yago-knowledge.org/resource/Bill_Clinton
+McCall,Carl,http://yago-knowledge.org/resource/male,http://yago-knowledge.org/resource/Democratic_Party_(United_States),http://dbpedia.org/resource/Carl_McCall,http://yago-knowledge.org/resource/Carl_McCall

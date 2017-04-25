@@ -16,13 +16,16 @@ class Politician:
             politicians = [row for row in reader]
         return politicians
 
+    def getRawList(self):
+        with open(self.path + self.fileData, "r") as fin:
+            return fin.readlines()
+
     def add(self, politicianDbpediaUri):
         sparql = SPARQLWrapper("http://localhost:8890/sparql")
         
         for r in self.getList():
             if politicianDbpediaUri == r["dbpediaURI"]:
-                print "resource already there"
-                return False        
+                raise Exception("resource already there")
         
         q = "SELECT * WHERE { ?politician owl:sameAs <" + politicianDbpediaUri + "> . ?politician yago-res:hasGivenName ?givenName . ?politician yago-res:hasFamilyName ?familyName . ?politician yago-res:hasGender ?gender . ?politician yago-res:isAffiliatedTo ?affiliatedTo . }"
         sparql.setQuery(q)
@@ -41,13 +44,4 @@ class Politician:
                     + bind["politician"]["value"] + "\n"
                     )
             return True
-        print "record not found"
-        return False
-
-#obj = Politician()
-#l = obj.getList()
-#
-#for i in range(10):
-#    print l[i]["dbpediaURI"]
-#    
-#obj.add("http://dbpedia.org/resource/Bill_Clinton")
+        raise Exception("record not found")

@@ -1,30 +1,32 @@
 from politician import Politician
 from nbclassifier import NBClassifier
 from etl import Etl
+import json
 
-class ProcessTweet:
+class TweetProcessor:
     politicianList = []
     
     def __init__(self):
         t = Politician()
         self.politicianList = t.getList()
         self.classifier = NBClassifier()
+        self.e = Etl()
         
     def process(self, jsonString):
-        if "lang" in jsonString and jsonString["lang"] == "en":
+        jsonData = json.loads(jsonString)
+        if "lang" in jsonData and jsonData["lang"] == "en":
+            output = []
             for politician in self.politicianList:
                 givenName = politician["givenName"]
                 familyName = politician["familyName"]
-                if familyName in line and givenName in line:
-                    jsonData = eval(jsonString)
+                if familyName in jsonString and givenName in jsonString:
                     if "text" in jsonData:
-                        jsonData["sentiment_analysis"] = self.classifier.classify(jsonData["text"])
-                        e = Etl()
-                        e.put(jsonData)
+                        sentiment = self.classifier.classify(jsonData["text"])
+                        self.e.put(jsonData, politician, sentiment)
+                        output.append([politician, sentiment])
                     else:
                         raise Exception("No text in jsonData")
-                else:
-                    raise Exception("Polician not found")
+            return output
         else:
             raise Exception("Not an English tweet")
 

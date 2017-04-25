@@ -1,6 +1,8 @@
 import mysql.connector
+import datetime
 
 class Etl:
+    # This class manages OLAP database
     
     # constants
     GENDER_MALE = 1
@@ -10,25 +12,38 @@ class Etl:
 
     def __init__(self):
         self.cnx = mysql.connector.connect(user='olap_test', password='olap_test', database='olap_test')
-        self.cursor = cnx.cursor()
+        self.cursor = self.cnx.cursor()
 
-    def put(self, obj):
-        dTemp = obj["created_at"][4:10]+" "+obj["created_at"][-4:]
+    def put(self, tweet, politician, sentiment):
+        # This method records the sentiment 
+        # into the OLAP database
+        
+        # processing data
+        dTemp = tweet["created_at"][4:10]+" "+tweet["created_at"][-4:]
         saDate = self.__putDate(datetime.datetime.strptime(dTemp, "%b %d %Y").strftime('%Y-%m-%d'))
-        saParty = PARTY_DEMOC if obj["affiliatedTo"][35:45] == "Democratic" else PARTY_REPUB
-        saGender = GENDER_FEMA if obj["gender"][-6:] == "female" else GENDER_MALE
+        saParty = self.PARTY_DEMOC if politician["affiliatedTo"][35:45] == "Democratic" else self.PARTY_REPUB
+        saGender = self.GENDER_FEMA if politician["gender"][-6:] == "female" else self.GENDER_MALE
+        
+        # politician dimension
         saPolitician = self.__putPolitician({
-                "name": obj["familyName"]+" "+obj["givenName"], 
-                "dbpedia_resource": obj["dbpediaURI"],
+                "name": politician["familyName"]+" "+politician["givenName"], 
+                "dbpedia_resource": politician["dbpediaURI"],
                 "gender_id": saGender,
                 "party_id": saParty
                 })["id"]
+        
+        # date dimension
         sa1 = {"date_id": saDate,
                 "politician_id": saPolitician,
                 }
-        return self.__putSentimentAnalysis(sa1, obj["sentiment_analysis"])
+        
+        # sentiment analysis fact
+        return self.__putSentimentAnalysis(sa1, sentiment)
         
     def __putDate(self, date):
+        # This method manages the date dimension
+        # If date doesn't exists, it will be created
+        
         self.cursor.execute("SELECT count(*) FROM dim_date WHERE date = %s ", [date])
         res = self.cursor.fetchone()
         if res[0] == 0:
@@ -37,6 +52,9 @@ class Etl:
         return date
 
     def __putPolitician(self, politician):
+        # This method manages the politician dimension
+        # If politician doesn't exists, it will be created
+
         self.cursor.execute("SELECT id FROM dim_politician WHERE dbpedia_resource = %s ", 
                 [politician["dbpedia_resource"]])
         res = self.cursor.fetchone()
@@ -51,6 +69,10 @@ class Etl:
         return politician
 
     def __putSentimentAnalysis(self, keys, sa):
+        # This method manages the sentiment analysis fact
+        # If record doesn't exist, it will be created, 
+        # otherwise it will increase the scoring points
+        
         self.cursor.execute("SELECT id FROM fact_sentiment_analysis " 
                 " WHERE date_id = %s AND politician_id = %s ", 
                 [keys["date_id"], keys["politician_id"]])

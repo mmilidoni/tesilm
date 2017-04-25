@@ -7,6 +7,8 @@ import pickle
 import re
 
 class NBClassifier:
+    # This class implements a Naive Bayes Classifier
+    # It uses a pickle previously created
     trainfeats = []
     testfeats = []
     classifierPickleFile = ""
@@ -25,7 +27,7 @@ class NBClassifier:
         f.close()
         self.classifier.show_most_informative_features(3)
 
-    def buildClassifier(self, neutral, annotatedCorpus="corpus_tsa_randomized.csv"):
+    def buildClassifier(self, neutral, annotatedCorpus):
         posSet = []
         negSet = []
         neuSet = []

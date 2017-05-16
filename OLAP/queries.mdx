@@ -1,0 +1,6 @@
+with member [Measures].[Total] as '(([Measures].[Negative] + [Measures].[Positive]) + [Measures].[Neutral])'
+  member [Measures].[Pos] as '([Measures].[Positive] / [Measures].[Total])', FORMAT_STRING = "Percent"
+select {[Politician.All Politicians Genders].Children} ON ROWS,
+  {Crossjoin({[Date].[All Dates].Children}, {[Measures].[Pos], [Measures].[Total]})} ON COLUMNS
+from [Sentiment Analysis]
+

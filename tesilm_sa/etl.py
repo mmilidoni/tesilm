@@ -43,11 +43,12 @@ class Etl:
     def __putDate(self, date):
         # This method manages the date dimension
         # If date doesn't exists, it will be created
-        
+        year = date[0:4]
+        month = date[5:7]
         self.cursor.execute("SELECT count(*) FROM dim_date WHERE date = %s ", [date])
         res = self.cursor.fetchone()
         if res[0] == 0:
-            self.cursor.execute("INSERT INTO dim_date (date) VALUES (%s)", [date])
+            self.cursor.execute("INSERT INTO dim_date (date, month, year) VALUES (%s, %s, %s)", [date, month, year])
             self.cnx.commit()
         return date
 

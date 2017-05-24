@@ -1,6 +1,7 @@
 from ScrolledText import ScrolledText
 from Tkinter import *
 from politician import Politician
+from etl import Etl
 from tweetprocessor import TweetProcessor
 
 class App:
@@ -22,6 +23,8 @@ class App:
         self.txtAddTweet.grid(row=1, column=0)
         btnAddTweet = Button(tweetProcessorFrame, text="Add", command=self.addTweet)
         btnAddTweet.grid(row=2, column=0)
+        btnExportGephi = Button(tweetProcessorFrame, text="Export Gephi file (*.gexf)", command=self.exportGephi)
+        btnExportGephi.grid(row=3, column=0)
         
         # politician frame
         rowPolitician = 1
@@ -76,6 +79,14 @@ class App:
             self.writeOutput(eDetail)
             raise
             
+    def exportGephi(self):
+        e = Etl()
+        from tkFileDialog import asksaveasfilename
+	import tkMessageBox
+        filename = asksaveasfilename() 
+        if e.exportGephi(filename):
+            tkMessageBox.showinfo("Info", "File salvato con successo.")
+        
     def listPoliticians(self):
         out = ""
         for politician in self.politicianObject.getRawList():

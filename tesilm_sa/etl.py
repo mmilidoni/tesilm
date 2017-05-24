@@ -69,6 +69,99 @@ class Etl:
             politician["id"] = res[0]
         return politician
 
+    def exportGephi(self, filename):
+        self.cursor.execute("SELECT SA.positive, SA.negative, SA.neutral,\
+                SA.date_id date,\
+                P.id politician_id, P.name politician_name, P.gender, P.party\
+                FROM fact_sentiment_analysis SA \
+                JOIN dim_politician P ON SA.politician_id = P.id \
+                ")
+        rows = self.cursor.fetchall()
+
+        import xml.etree.cElementTree as ET
+
+        root = ET.Element("gexf")
+        root.attrib["xmlns"] = "http://www.gexf.net/1.1draft"
+        root.attrib["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+        root.attrib["xsi:schemaLocation"] = "http://www.gexf.net/1.1draft http://www.gexf.net/1.1draft/gexf.xsd"
+        root.attrib["version"] = "1.3"
+
+        graph = ET.Element("graph", mode="static", defaultedgetype="undirected")
+        
+        graphAttribs = ET.Element("attributes")
+        graphAttribs.attrib["class"] = "node"
+        graphAttribs.attrib["mode"] = "dynamic"
+        graphAttribs.append(ET.Element("attribute", title="Appreciation", type="float", id="appreciation"))
+        graphAttribs.append(ET.Element("attribute", title="Gender", type="string", id="gender"))
+        #graphAttribs.append(ET.Element("attribute", title="Party", type="string", id="party"))
+        graph.append(graphAttribs)
+
+        nodes = ET.Element("nodes")
+        edges = ET.Element("edges")
+        nodesDict = {}
+        edgesList = []
+
+        for row in rows:
+            saPositive = float(row[0])
+            saNegative = float(row[1])
+            saNeutral  = float(row[2])
+            appr = str(round(float(saPositive / (saPositive + saNeutral + saNegative)), 4))
+            d1 = datetime.datetime.strptime("2015-08-01", "%Y-%m-%d")
+            d2 = datetime.datetime.strptime(row[3].isoformat(), "%Y-%m-%d")
+            date = str(int(2000 + (d2 - d1).days)) #.replace("-", "")
+            politicianId = str(row[4])
+            politicianName = str(row[5])
+            politicianGender = str(row[6])
+            politicianParty = str(row[7])
+
+            if not politicianId in nodesDict.keys():
+                node = ET.Element("node", id=politicianId, label=politicianName)
+                attvalues = ET.Element("attvalues")
+                attvalueGender = ET.Element("attvalue")
+                attvalueGender.attrib["for"] = "gender"
+                attvalueGender.attrib["value"] = politicianGender
+                attvalueParty = ET.Element("attvalue")
+                attvalues.append(attvalueGender)
+                #attvalueParty.attrib["for"] = "party"
+                #attvalueParty.attrib["value"] = politicianParty
+                #attvalues.append(attvalueParty)
+
+                node.append(attvalues)
+                #edgesList.append(ET.Element("edge", source=politicianId, target=politicianGender))
+                edgesList.append(ET.Element("edge", source=politicianId, target=politicianParty))
+            else:
+                node = nodesDict[politicianId]
+
+            attvalues = node.find("attvalues")
+            value = ET.Element("attvalue", value=appr, start=date, end=date)
+            value.attrib["for"] = "appreciation"
+            attvalues.append(value)
+
+            nodesDict[politicianId] = node
+
+            if not politicianParty in nodesDict.keys():
+                nodesDict[politicianParty] = ET.Element("node", id=politicianParty, label=politicianParty)
+            #if not politicianGender in nodesDict.keys():
+            #    nodesDict[politicianGender] = ET.Element("node", id=politicianGender, label=politicianGender)
+
+        for k in nodesDict.keys():
+            nodes.append(nodesDict[k])
+
+        for edge in edgesList:
+            edges.append(edge)
+
+        graph.append(nodes)
+        graph.append(edges)
+        root.append(graph)
+        tree = ET.ElementTree(root)
+        if filename.endswith(".gexf"):
+            tree.write(filename)
+        else:
+            tree.write(filename + ".gexf")
+
+        return True
+
+
     def __putSentimentAnalysis(self, keys, sa):
         # This method manages the sentiment analysis fact
         # If record doesn't exist, it will be created, 

@@ -92,6 +92,7 @@ class Etl:
         graphAttribs.attrib["class"] = "node"
         graphAttribs.attrib["mode"] = "dynamic"
         graphAttribs.append(ET.Element("attribute", title="Appreciation", type="float", id="appreciation"))
+        graphAttribs.append(ET.Element("attribute", title="TotalSentiment", type="int", id="total_sentiment"))
         graphAttribs.append(ET.Element("attribute", title="Gender", type="string", id="gender"))
         #graphAttribs.append(ET.Element("attribute", title="Party", type="string", id="party"))
         graph.append(graphAttribs)
@@ -105,10 +106,9 @@ class Etl:
             saPositive = float(row[0])
             saNegative = float(row[1])
             saNeutral  = float(row[2])
-            appr = str(round(float(saPositive / (saPositive + saNeutral + saNegative)), 4))
-            d1 = datetime.datetime.strptime("2015-08-01", "%Y-%m-%d")
-            d2 = datetime.datetime.strptime(row[3].isoformat(), "%Y-%m-%d")
-            date = str(int(2000 + (d2 - d1).days)) #.replace("-", "")
+            totalSentiment = int(saPositive + saNeutral + saNegative)
+            appr = str(round(float(saPositive / float(totalSentiment)), 4))
+            date = str(row[3].isoformat()).replace("-", "")
             politicianId = str(row[4])
             politicianName = str(row[5])
             politicianGender = str(row[6])
@@ -122,9 +122,10 @@ class Etl:
                 attvalueGender.attrib["value"] = politicianGender
                 attvalueParty = ET.Element("attvalue")
                 attvalues.append(attvalueGender)
-                #attvalueParty.attrib["for"] = "party"
-                #attvalueParty.attrib["value"] = politicianParty
-                #attvalues.append(attvalueParty)
+                attvalueTotalSentiment = ET.Element("attvalue")
+                attvalueTotalSentiment.attrib["for"] = "total_sentiment"
+                attvalueTotalSentiment.attrib["value"] = str(totalSentiment)
+                attvalues.append(attvalueTotalSentiment)
 
                 node.append(attvalues)
                 #edgesList.append(ET.Element("edge", source=politicianId, target=politicianGender))
@@ -141,6 +142,19 @@ class Etl:
 
             if not politicianParty in nodesDict.keys():
                 nodesDict[politicianParty] = ET.Element("node", id=politicianParty, label=politicianParty)
+                attvaluesPol = ET.Element("attvalues")
+                valuePol = ET.Element("attvalue", value="3000")
+                valuePol.attrib["for"] = "total_sentiment"
+                attvaluesPol.append(valuePol)
+                valuePol = ET.Element("attvalue", value="neutral")
+                valuePol.attrib["for"] = "gender"
+                attvaluesPol.append(valuePol)
+                valuePol = ET.Element("attvalue", value="1")
+                valuePol.attrib["for"] = "appreciation"
+                attvaluesPol.append(valuePol)
+                nodesDict[politicianParty].append(attvaluesPol)
+
+
             #if not politicianGender in nodesDict.keys():
             #    nodesDict[politicianGender] = ET.Element("node", id=politicianGender, label=politicianGender)
 
